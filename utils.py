@@ -10,8 +10,7 @@ def data_from_http(href):
         return data
     except:
         print "can't get \n"+href
-        print 'using '+ temp_file_name
-        return open(temp_file_name)
+
 
 def nameArray(fullName):
     nameArray = fullName.split(' ', 1 )
@@ -22,7 +21,24 @@ def getBills(billsHref):
     data = data_from_http(billsHref)
     soup = BeautifulSoup(data)
     
-    table = soup.find(id='ctl00_PlaceHolderMain_dgSponsoredBills').find_all('tr')
+    soup = soup.find(id='ctl00_PlaceHolderMain_dgSponsoredBills').findAll('tr')
+    #skips first header row
+    itersoup = iter(soup)
+    next(itersoup)
+    
+    for tr in itersoup:
+        billNumberTd = tr.findAll('td')[0]
+        billDescriptionTd = tr.findAll('td')[1]
+        try:  
+            billNumber = billNumberTd.find('a').string
+            print billNumber
+            billDescription = billDescriptionTd.find('span').string
+            print billDescription
+        except:
+            print 'fail'
+
+       
+        
     #find each td in the row. add to the array. Return the array
         
 
@@ -33,7 +49,7 @@ base = 'http://www.leg.wa.gov'
 
 href = base +'/House/Representatives/Pages/default.aspx'
 
-billsQuery = href+'?m='
+billsQuery = 'http://www.leg.wa.gov/house/Representatives/Pages/BillSponsorship.aspx?m='
 
 data = data_from_http(href)
 
@@ -41,15 +57,17 @@ soup = BeautifulSoup(data)
 table = soup.find(id='ctl00_PlaceHolderMain_dlMembers').find_all('a')
 
 for a in table:
-
-    name = a.string
-    print a.string
-    href= a['href']
-    print a['href']
-    firstName, lastName = nameArray('hello john')
-    
-    billsHref = billsQuery+lastName
-    bills = getBills(billsHref)
+    if a == table[0]: #test only get firstperson
+        
+        name = a.string
+        print a.string
+        href= a['href']
+        print a['href']
+        firstName, lastName = nameArray(name)
+        
+        billsHref = billsQuery+lastName
+        print billsHref
+        bills = getBills(billsHref)
     
     
     
