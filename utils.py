@@ -21,21 +21,24 @@ def getBills(billsHref):
     data = data_from_http(billsHref)
     soup = BeautifulSoup(data)
     
-    soup = soup.find(id='ctl00_PlaceHolderMain_dgSponsoredBills').findAll('tr')
-    #skips first header row
-    itersoup = iter(soup)
-    next(itersoup)
-    
-    for tr in itersoup:
-        billNumberTd = tr.findAll('td')[0]
-        billDescriptionTd = tr.findAll('td')[1]
-        try:  
-            billNumber = billNumberTd.find('a').string
-            print billNumber
-            billDescription = billDescriptionTd.find('span').string
-            print billDescription
-        except:
-            print 'fail'
+    try:
+        soup = soup.find(id='ctl00_PlaceHolderMain_dgSponsoredBills').findAll('tr')
+        #skips first header row
+        itersoup = iter(soup)
+        next(itersoup)
+        
+        for tr in itersoup:
+            billNumberTd = tr.findAll('td')[0]
+            billDescriptionTd = tr.findAll('td')[1]
+            try:  
+                billNumber = billNumberTd.find('a').string
+                print billNumber
+                billDescription = billDescriptionTd.find('span').get_text()
+                print billDescription
+            except:
+                print 'fail'
+    except:
+        return
 
        
         
@@ -57,7 +60,7 @@ soup = BeautifulSoup(data)
 table = soup.find(id='ctl00_PlaceHolderMain_dlMembers').find_all('a')
 
 for a in table:
-    if a == table[0]: #test only get firstperson
+    if a == table[8]: #test only get firstperson
         
         name = a.string
         print a.string
