@@ -1,7 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
+import re
+from urllib2 import urlopen
+from urllib import urlretrieve
+import os
+import sys
 
-
+#helper functions
 def data_from_http(href):
 
     try:
@@ -40,71 +45,85 @@ def getBills(billsHref):
     except:
         return
 
-       
-        
-    #find each td in the row. add to the array. Return the array
-        
+def getParty(partyHref):
+    
+    data = data_from_http(partyHref)
+    soup = BeautifulSoup(data)
+    
+    committeesList=[]
+    committees = soup.find(id='PageContent').contents[0].find_next_sibling('div').find_all('td')[1].find_all('a')
+    for committee in committees:
+        if committee is not committees[-1]:
+             committeesList.append([committee['href'],committee.string])
+    
+    party = soup.find(id='ctl00_PlaceHolderMain_lblParty').string
+    district = soup.find(id='ctl00_PlaceHolderMain_hlDistrict').string
+    districtNumber = re.findall(r'\d+', district)
+    contactLink = soup.find(id='ctl00_PlaceHolderMain_hlEmail')['href'] 
+    phone = soup.find(id='ctl00_PlaceHolderMain_hlDistrict').parent.find('table').get_text()
+    phone = re.findall(r'\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}', phone)
+    website = soup.find(id='ctl00_PlaceHolderMain_hlHomePage')['href']
 
+    return party, districtNumber[0], phone[0], website,contactLink,committeesList
+        
+senateHref='http://www.leg.wa.gov/Senate/Senators/Pages/default.aspx'
 
-politicians = {} #object to hold all of our scraped people
 
 base = 'http://www.leg.wa.gov'
+houseHref = base +'/House/Representatives/Pages/default.aspx'
+billsQuery = base + '/house/Representatives/Pages/BillSponsorship.aspx?m='
 
-href = base +'/House/Representatives/Pages/default.aspx'
 
-billsQuery = 'http://www.leg.wa.gov/house/Representatives/Pages/BillSponsorship.aspx?m='
-
-data = data_from_http(href)
-
+data = data_from_http(houseHref)
 soup = BeautifulSoup(data)
-table = soup.find(id='ctl00_PlaceHolderMain_dlMembers').find_all('a')
 
+table = soup.find(id='ctl00_PlaceHolderMain_dlMembers').find_all('a')
 for a in table:
     if a == table[8]: #test only get firstperson
         
+#         #vars needed for each party
+#         name
+#         abbreviation
+#         order
+#         #vars needed for each district
+#         type 
+#         number
+#         #vars needed for each position
+#         title
+#         statewide
+#         slug
+#         rss_category
+#         district
+#         #vars needed for each vandidate
+#         first_name
+#         last_name
+#         img_url
+#         party
+#         phone
+        
+        
+        
         name = a.string
-        print a.string
-        href= a['href']
-        print a['href']
+        print name
+        href= base+a['href']
+        #print a['href']
         firstName, lastName = nameArray(name)
         
         billsHref = billsQuery+lastName
         print billsHref
-        bills = getBills(billsHref)
-    
-    
-    
-    
-#     r = representatives(
-#         self.name,
-#         self.position,
-#         self.party,
-#         self.info,
-#         self.bills,
-#     )
-# get or create the rep
-# r.bills = self.bills /* redefines the bills
-    
+        #bills = getBills(billsHref)
+        party,districtNumber,phone,website,contactLink,committeesList = getParty(href)
+        position = 'State House: '
+        print 'party: ' + party
+        print 'districtNumber: ' + districtNumber
+        print 'position: ' + position
+        print 'phone: ' + phone
+        print 'website: ' + website
+        print 'contactLink: ' + contactLink
+        
 
 
 
 
-
-
-
-
-class representatives(object):
-
-    def __init__(self, name, position, party, info, bills):
-        self.name = name
-        self.position = position
-        self.party = party
-        self.info = info 
-        self.bills = bills 
-
-    def __unicode__(self):
-        return "%s" % (self.name)
-
-    def __repr__(self):
-        # TODO
-        return self.__unicode__()
+       
+ 
