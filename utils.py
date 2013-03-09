@@ -8,7 +8,6 @@ import sys
 
 #helper functions
 def data_from_http(href):
-
     try:
         r = requests.get(href)
         data = r.text
@@ -16,13 +15,12 @@ def data_from_http(href):
     except:
         print "can't get \n"+href
 
-
 def nameArray(fullName):
     nameArray = fullName.split(' ', 1 )
     return nameArray[0], nameArray[1]
 
 def getBills(billsHref):
-    bills = []
+    billsList = []
     data = data_from_http(billsHref)
     soup = BeautifulSoup(data)
     
@@ -37,15 +35,19 @@ def getBills(billsHref):
             billDescriptionTd = tr.findAll('td')[1]
             try:  
                 billNumber = billNumberTd.find('a').string
-                print billNumber
                 billDescription = billDescriptionTd.find('span').get_text()
-                print billDescription
+                billRssFeed = 'http://apps.leg.wa.gov/billinfo/SummaryRss.aspx?bill='+billNumber+'&year=2013'
+                billsList.append([billNumber,billDescription,billRssFeed])
+                
             except:
                 print 'fail'
+            
+        return billsList
     except:
         return
 
-def getParty(partyHref):
+    
+def getPersonInfo(partyHref):
     
     data = data_from_http(partyHref)
     soup = BeautifulSoup(data)
@@ -53,20 +55,31 @@ def getParty(partyHref):
     committeesList=[]
     committees = soup.find(id='PageContent').contents[0].find_next_sibling('div').find_all('td')[1].find_all('a')
     for committee in committees:
-        if committee is not committees[-1]:
-             committeesList.append([committee['href'],committee.string])
+        if committee is not committees[-1]: #last link is a link to hi rez photo
+             committeesList.append([base+committee['href'],committee.string])
     
     party = soup.find(id='ctl00_PlaceHolderMain_lblParty').string
     district = soup.find(id='ctl00_PlaceHolderMain_hlDistrict').string
     districtNumber = re.findall(r'\d+', district)
-    contactLink = soup.find(id='ctl00_PlaceHolderMain_hlEmail')['href'] 
+    try:
+        contactLink = soup.find(id='ctl00_PlaceHolderMain_hlEmail')['href']
+    except:
+        contactLink = ''
     phone = soup.find(id='ctl00_PlaceHolderMain_hlDistrict').parent.find('table').get_text()
+    #regex to grab phone
     phone = re.findall(r'\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}', phone)
     website = soup.find(id='ctl00_PlaceHolderMain_hlHomePage')['href']
+    imgUrl = soup.find(id='ctl00_PlaceHolderMain_imgPhoto')['src']
+    return party, districtNumber[0], phone[0], website,contactLink,committeesList,imgUrl
 
-    return party, districtNumber[0], phone[0], website,contactLink,committeesList
-        
-senateHref='http://www.leg.wa.gov/Senate/Senators/Pages/default.aspx'
+def getPersonImg(imgUrl,imgName):
+
+    f = open(imgName+'.jpg','wb')
+    f.write(requests.get(imgUrl).content)
+    f.close()
+    #return 'static/path/'+imgName
+    
+
 
 
 base = 'http://www.leg.wa.gov'
@@ -79,47 +92,30 @@ soup = BeautifulSoup(data)
 
 table = soup.find(id='ctl00_PlaceHolderMain_dlMembers').find_all('a')
 for a in table:
-    if a == table[8]: #test only get firstperson
-        
-#         #vars needed for each party
-#         name
-#         abbreviation
-#         order
-#         #vars needed for each district
-#         type 
-#         number
-#         #vars needed for each position
-#         title
-#         statewide
-#         slug
-#         rss_category
-#         district
-#         #vars needed for each vandidate
-#         first_name
-#         last_name
-#         img_url
-#         party
-#         phone
-        
-        
-        
+    if a == table[33]: #test only get firstperson
+    #if a == a:    
         name = a.string
-        print name
+        
         href= base+a['href']
-        #print a['href']
         firstName, lastName = nameArray(name)
         
         billsHref = billsQuery+lastName
-        print billsHref
-        #bills = getBills(billsHref)
-        party,districtNumber,phone,website,contactLink,committeesList = getParty(href)
-        position = 'State House: '
+        billsList = getBills(billsHref)
+        party,districtNumber,phone,website,contactLink,committeesList,imgUrl = getPersonInfo(href)
+        position = 'State House'
+        getPersonImg(imgUrl,firstName+'_'+lastName) #downloads images, only use on first run
+        finalImgUrl = 'static/img/'+firstName+'_'+lastName+'.jpg'
+        
+        print name
         print 'party: ' + party
         print 'districtNumber: ' + districtNumber
         print 'position: ' + position
         print 'phone: ' + phone
         print 'website: ' + website
         print 'contactLink: ' + contactLink
+        print 'img url: ' + finalImgUrl
+#         print committeesList
+#         print billsList
         
 
 
