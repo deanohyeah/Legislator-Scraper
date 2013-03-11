@@ -73,7 +73,8 @@ def getPersonInfo(partyHref):
     phone = re.findall(r'\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}', phone)
     website = soup.find(id='ctl00_PlaceHolderMain_hlHomePage')['href']
     imgUrl = soup.find(id='ctl00_PlaceHolderMain_imgPhoto')['src']
-    return party, districtNumber[0], phone[0], website,contactLink,committeesList,imgUrl
+    billSponsorshipUrl = soup.find(id='ctl00_PlaceHolderMain_hlBillSponsorship')['href']
+    return party, districtNumber[0], phone[0], website,contactLink,committeesList,imgUrl,billSponsorshipUrl
 
 def getPersonImg(imgUrl,imgName):
     imgFolder = '../../scraped-images/'
@@ -86,8 +87,6 @@ def getPersonImg(imgUrl,imgName):
 
 base = 'http://www.leg.wa.gov'
 houseHref = base +'/House/Representatives/Pages/default.aspx'
-billsQuery = base + '/house/Representatives/Pages/BillSponsorship.aspx?m='
-
 
 data = data_from_http(houseHref)
 soup = BeautifulSoup(data)
@@ -101,24 +100,25 @@ for a in table:
         href= base+a['href']
         firstName, lastName = nameArray(name)
         
-        billsHref = billsQuery+lastName
-        billsList = getBills(billsHref)
-        email = firstName+'.'+lastName+'@leg.wa.gov'
-        party,districtNumber,phone,website,contactLink,committeesList,imgUrl = getPersonInfo(href)
+        #gets variables for each legislator
+        party,districtNumber,phone,website,contactLink,committeesList,imgUrl,billSponsorshipUrl = getPersonInfo(href)
+       
+        billsList = getBills(base+billSponsorshipUrl)
+        email = firstName+'.'+lastName+'@leg.wa.gov'       
         position = 'State House'
         getPersonImg(imgUrl,firstName+'_'+lastName) #downloads images, only use on first run
         finalImgUrl = 'static/img/'+firstName+'_'+lastName+'.jpg'
         
-        print name
+#         print name
         print 'party: ' + party
-        print 'districtNumber: ' + districtNumber
-        print 'position: ' + position
-        print 'phone: ' + phone
-        print 'website: ' + website
-        print 'contactLink: ' + contactLink
-        print 'img url: ' + finalImgUrl
+#         print 'districtNumber: ' + districtNumber
+#         print 'position: ' + position
+#         print 'phone: ' + phone
+#         print 'website: ' + website
+#         print 'contactLink: ' + contactLink
+#         print 'img url: ' + finalImgUrl
 #         print committeesList
-#         print billsList
+        print billsList
         
 
 
