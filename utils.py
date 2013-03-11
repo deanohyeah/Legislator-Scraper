@@ -17,6 +17,9 @@ def data_from_http(href):
 
 def nameArray(fullName):
     nameArray = fullName.split(' ', 1 )
+    if len(nameArray) > 2:
+        print 'WIERD NAME'
+        print fullName
     return nameArray[0], nameArray[1]
 
 def getBills(billsHref):
@@ -73,11 +76,10 @@ def getPersonInfo(partyHref):
     return party, districtNumber[0], phone[0], website,contactLink,committeesList,imgUrl
 
 def getPersonImg(imgUrl,imgName):
-
-    f = open(imgName+'.jpg','wb')
+    imgFolder = '../../scraped-images/'
+    f = open(imgFolder+imgName+'.jpg','wb')
     f.write(requests.get(imgUrl).content)
     f.close()
-    #return 'static/path/'+imgName
     
 
 
@@ -101,6 +103,7 @@ for a in table:
         
         billsHref = billsQuery+lastName
         billsList = getBills(billsHref)
+        email = firstName+'.'+lastName+'@leg.wa.gov'
         party,districtNumber,phone,website,contactLink,committeesList,imgUrl = getPersonInfo(href)
         position = 'State House'
         getPersonImg(imgUrl,firstName+'_'+lastName) #downloads images, only use on first run
