@@ -1,8 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-import os
-import sys
 
 class ScrapeLeg:
     def __init__(self,href,base,position):
@@ -11,13 +9,13 @@ class ScrapeLeg:
         self.position = position
 
     def scrapeIt(self):
-        data = self.data_from_http(senateHref)
+        data = self.data_from_http(self.href)
         soup = BeautifulSoup(data)
         
         politicians = soup.find(id='ctl00_PlaceHolderMain_dlMembers').find_all('a')
         for politician in politicians:
-            if politician == politicians[33]: #test only get firstperson
-            #if a == a:    
+            if politician == politicians[37]: #test only get firstperson
+            #if politician == politician:    
                 name = politician.string
                 
                 self.href= base+politician['href']
@@ -45,15 +43,15 @@ class ScrapeLeg:
     def printVars(self):
 #         print name
         print 'fist name: ' + self.firstName
-        print 'last name: ' + self.lastName
-        print 'party: ' + self.party
-        print 'districtNumber: ' + self.districtNumber
-        print 'position: ' + self.position
-        print 'phone: ' + self.phone
-        print 'website: ' + self.website
-        print 'contactLink: ' + self.contactLink
-        print 'email: ' + self.email
-        print 'img url: ' + self.finalImgUrl
+        # print 'last name: ' + self.lastName
+#         print 'party: ' + self.party
+#         print 'districtNumber: ' + self.districtNumber
+#         print 'position: ' + self.position
+#         print 'phone: ' + self.phone
+#         print 'website: ' + self.website
+#         print 'contactLink: ' + self.contactLink
+#         print 'email: ' + self.email
+#         print 'img url: ' + self.finalImgUrl
        #  print self.committeesList
 #         print self.billsList
             
@@ -120,12 +118,14 @@ class ScrapeLeg:
             contactLink = soup.find(id='ctl00_PlaceHolderMain_hlEmail')['href']
         except:
             contactLink = ''
-        phone = soup.find(id='ctl00_PlaceHolderMain_hlDistrict').parent.find('table').get_text()
+        phone = str(soup.find(id='ctl00_PlaceHolderMain_hlDistrict').parent.find('table'))
+        print str(phone)
         #regex to grab phone
-        phone = re.findall(r'\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}', phone)
+        phone = re.findall(r'(\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4})', phone)
         website = soup.find(id='ctl00_PlaceHolderMain_hlHomePage')['href']
         imgUrl = soup.find(id='ctl00_PlaceHolderMain_imgPhoto')['src']
         billSponsorshipUrl = soup.find(id='ctl00_PlaceHolderMain_hlBillSponsorship')['href']
+        
         return [party, districtNumber[0], phone[0], website,contactLink,committeesList,imgUrl,billSponsorshipUrl]
     
     def getPersonImg(self,imgUrl,imgName):
@@ -140,8 +140,8 @@ houseHref = base +'/House/Representatives/Pages/default.aspx'
 senateHref = base +'/Senate/Senators/Pages/default.aspx'
 position = 'State House'
 
-house = ScrapeLeg(houseHref,base,'State House')
-house.scrapeIt()
+# house = ScrapeLeg(houseHref,base,'State House')
+# house.scrapeIt()
 
 senate = ScrapeLeg(senateHref,base,'State Senate')
 senate.scrapeIt()
