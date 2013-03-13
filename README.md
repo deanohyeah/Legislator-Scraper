@@ -3,7 +3,9 @@ Washington State Legislator Scraper
 
 Scrapes Representatives and legislators along with bills they sponsor
 
+
 **Usage**
+- Install dependencies (requests, beautifulsoup, lxml)`pip install -r requirments.txt`
 - Define the base url
 
 `base = 'http://www.leg.wa.gov'`
