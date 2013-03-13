@@ -13,7 +13,7 @@ Scrapes Representatives and legislators along with bills they sponsor
 `houseHref = base +'/House/Representatives/Pages/default.aspx'`
 
 `senateHref = base +'/Senate/Senators/Pages/default.aspx'`
-- Defind the position(this is for django implementation)
+- Define the position(this is for django implementation)
 `position = 'State House'`
 
 - Instantiate the scraper
