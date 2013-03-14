@@ -1,7 +1,8 @@
 Washington State Legislator Scraper
 ==================
 
-Scrapes Representatives and legislators along with bills they sponsor
+Scrapes house Representatives and Senators along with bills they sponsor from 
+`http://www.leg.wa.gov/Senate/Senators/Pages/default.aspx` and `http://www.leg.wa.gov/house/representatives/Pages/default.aspx`
 
 
 **Usage**
